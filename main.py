@@ -1,0 +1,279 @@
+import argparse
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import List, Dict
+
+from inference.llama_inference import create_llama_inference
+from inference.openai_inference import create_openai_inference
+
+from prompts.system_prompts import get_system_prompt, AVAILABLE_PROFILES
+from prompts.user_prompts import create_user_prompt
+from prompts.parameters import get_generation_params
+
+from data.learner_profiles import get_learner_profile, get_all_profiles
+from data.question_data import get_question, get_questions_by_grade
+
+
+class AdaptiveLearningBenchmark:
+    
+    def __init__(self, output_dir: str = "outputs"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(exist_ok=True)
+        self.results = []
+    
+    def create_messages(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        image_paths: List[str]
+    ) -> List[Dict]:
+        messages = [
+            {
+                "role": "system",
+                "content": system_prompt
+            },
+            {
+                "role": "user",
+                "content": user_prompt
+            }
+        ]
+        
+        return messages
+    
+    def run_evaluation(
+        self,
+        model_name: str,
+        model_type: str,
+        learner_profile: str,
+        question_id: str,
+        save_intermediate: bool = True
+    ) -> Dict:
+        print(f"\n{'='*60}")
+        print(f"Evaluating: {model_name}")
+        print(f"Learner: {learner_profile}")
+        print(f"Question: {question_id}")
+        print(f"{'='*60}\n")
+        
+        learner_data = get_learner_profile(learner_profile)
+        question_data = get_question(question_id)
+        
+        system_prompt = get_system_prompt(learner_profile)
+        user_prompt = create_user_prompt(
+            question_data["question_number"],
+            question_data.get("description", "")
+        )
+        
+        generation_params = get_generation_params(learner_profile)
+        
+        # Prepare messages
+        image_paths = [question_data["image_path"]]
+        messages = self.create_messages(system_prompt, user_prompt, image_paths)
+        
+        # Load and run model
+        if model_type == "llama":
+            inference = create_llama_inference(model_name)
+            result = inference.generate(
+                messages=messages,
+                images=image_paths,
+                **generation_params
+            )
+        elif model_type == "openai":
+            inference = create_openai_inference(model_name)
+            result = inference.generate(
+                messages=messages,
+                images=image_paths,
+                **generation_params
+            )
+        else:
+            raise ValueError(f"Unknown model type: {model_type}")
+        
+        # Prepare result
+        evaluation_result = {
+            "timestamp": datetime.now().isoformat(),
+            "model": model_name,
+            "model_type": model_type,
+            "learner_profile": learner_profile,
+            "learner_data": learner_data,
+            "question_id": question_id,
+            "question_data": question_data,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "generation_params": generation_params,
+            "response": result["response"],
+            "metadata": {
+                k: v for k, v in result.items() if k != "response"
+            }
+        }
+        
+        # Save intermediate result if requested
+        if save_intermediate:
+            self.save_result(evaluation_result)
+        
+        self.results.append(evaluation_result)
+        return evaluation_result
+    
+    def save_result(self, result: Dict):
+        """Save a single result to a JSON file."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = (
+            f"{result['model'].replace('/', '_')}_"
+            f"{result['learner_profile']}_"
+            f"{result['question_id']}_"
+            f"{timestamp}.json"
+        )
+        
+        output_path = self.output_dir / filename
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+        
+        print(f"Saved result to: {output_path}")
+    
+    def run_full_evaluation(
+        self,
+        models: List[Dict],
+        save_summary: bool = True
+    ):
+        """
+        Run full evaluation across all models, learners, and questions.
+        
+        Args:
+            models: List of model configurations
+            save_summary: Whether to save a summary of all results
+        """
+        print(f"\n{'='*60}")
+        print("STARTING FULL EVALUATION")
+        print(f"{'='*60}\n")
+        
+        # Get all learner profiles
+        learner_profiles = AVAILABLE_PROFILES
+        
+        # Run evaluation for each combination
+        for model_config in models:
+            model_name = model_config["name"]
+            model_type = model_config["type"]
+            
+            for profile in learner_profiles:
+                learner_data = get_learner_profile(profile)
+                grade = learner_data["grade"]
+                
+                # Get questions for this grade
+                questions = get_questions_by_grade(grade)
+                
+                for question_id, question_data in questions.items():
+                    try:
+                        result = self.run_evaluation(
+                            model_name=model_name,
+                            model_type=model_type,
+                            learner_profile=profile,
+                            question_id=question_id
+                        )
+                        
+                        print(f"✓ Completed: {model_name} - {profile} - {question_id}")
+                        
+                    except Exception as e:
+                        print(f"✗ Failed: {model_name} - {profile} - {question_id}")
+                        print(f"  Error: {str(e)}\n")
+        
+        # Save summary
+        if save_summary:
+            self.save_summary()
+        
+        print(f"\n{'='*60}")
+        print("EVALUATION COMPLETE")
+        print(f"Total results: {len(self.results)}")
+        print(f"{'='*60}\n")
+    
+    def save_summary(self):
+        """Save a summary of all results."""
+        summary = {
+            "total_evaluations": len(self.results),
+            "timestamp": datetime.now().isoformat(),
+            "results": [
+                {
+                    "model": r["model"],
+                    "learner": r["learner_profile"],
+                    "question": r["question_id"],
+                    "timestamp": r["timestamp"]
+                }
+                for r in self.results
+            ]
+        }
+        
+        summary_path = self.output_dir / "summary.json"
+        with open(summary_path, 'w', encoding='utf-8') as f:
+            json.dump(summary, f, indent=2)
+        
+        print(f"Saved summary to: {summary_path}")
+
+
+def main():
+    """Main entry point for the script."""
+    parser = argparse.ArgumentParser(
+        description="Run adaptive learning LLM benchmark"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specific model to evaluate (optional)"
+    )
+    parser.add_argument(
+        "--profile",
+        type=str,
+        help="Specific learner profile to evaluate (optional)"
+    )
+    parser.add_argument(
+        "--question",
+        type=str,
+        help="Specific question to evaluate (optional)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="outputs",
+        help="Output directory"
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Run full evaluation across all combinations"
+    )
+    
+    args = parser.parse_args()
+    
+    # Define models to evaluate
+    models = [
+        {"name": "meta-llama/Llama-3.2-11B-Vision-Instruct", "type": "llama"},
+        {"name": "meta-llama/Llama-3.2-90B-Vision", "type": "llama"},
+        {"name": "meta-llama/Llama-4-Scout-17B-16E-Instruct", "type": "llama"},
+        {"name": "gpt-4o", "type": "openai"},
+        {"name": "gpt-5", "type": "openai"},
+        {"name": "o1", "type": "openai"},
+    ]
+    
+    benchmark = AdaptiveLearningBenchmark(output_dir=args.output)
+    
+    if args.full:
+        # Run full evaluation
+        benchmark.run_full_evaluation(models)
+    else:
+        # Run specific evaluation
+        if args.model and args.profile and args.question:
+            model_config = next((m for m in models if m["name"] == args.model), None)
+            if not model_config:
+                print(f"Error: Unknown model: {args.model}")
+                return
+            
+            benchmark.run_evaluation(
+                model_name=args.model,
+                model_type=model_config["type"],
+                learner_profile=args.profile,
+                question_id=args.question
+            )
+        else:
+            print("Specify --model, --profile, and --question, or use --full for full evaluation")
+
+
+if __name__ == "__main__":
+    main()
