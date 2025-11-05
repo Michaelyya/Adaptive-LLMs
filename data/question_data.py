@@ -62,29 +62,11 @@ GRADE8_QUESTIONS = {
 
 
 def get_question(question_id: str) -> dict:
-    """
-    Get a specific question.
-    
-    Args:
-        question_id: Question identifier (e.g., "G4Q1", "G8Q3")
-        
-    Returns:
-        Dictionary containing question data
-    """
     all_questions = {**GRADE4_QUESTIONS, **GRADE8_QUESTIONS}
     return all_questions.get(question_id, {})
 
 
 def get_questions_by_grade(grade: int) -> dict:
-    """
-    Get all questions for a specific grade.
-    
-    Args:
-        grade: Grade level (4 or 8)
-        
-    Returns:
-        Dictionary of questions for the grade
-    """
     if grade == 4:
         return GRADE4_QUESTIONS.copy()
     elif grade == 8:

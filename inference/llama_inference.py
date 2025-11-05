@@ -5,10 +5,7 @@ from typing import Dict, List, Optional
 from .base_inference import BaseInference, load_image
 
 
-class LlamaInference(BaseInference):
-    """Inference class for Llama vision models."""
-    
-    # Model mapping for different Llama variants
+class LlamaInference(BaseInference):   
     MODEL_CONFIGS = {
         "meta-llama/Llama-3.2-11B-Vision-Instruct": {
             "processor_class": "AutoProcessor",
@@ -38,17 +35,14 @@ class LlamaInference(BaseInference):
             raise ValueError(f"Unsupported model: {self.model_name}")
     
     def load_model(self):
-        """Load the Llama model and processor."""
         config = self.MODEL_CONFIGS[self.model_name]
         
-        # Load processor
         if config["processor_class"] == "AutoProcessor":
             self.processor = AutoProcessor.from_pretrained(self.model_name)
         else:
             from transformers import AutoProcessor
             self.processor = AutoProcessor.from_pretrained(self.model_name)
         
-        # Load model
         if config["processor_class"] == "AutoProcessor":
             self.model = AutoModelForVision2Seq.from_pretrained(
                 self.model_name,
@@ -77,19 +71,7 @@ class LlamaInference(BaseInference):
         temperature: float = 0.7,
         **kwargs
     ) -> Dict:
-        """
-        Generate response using Llama model.
-        
-        Args:
-            messages: List of message dictionaries
-            images: List of image paths/URLs
-            max_new_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            **kwargs: Additional parameters
-            
-        Returns:
-            Dictionary with 'response' and metadata
-        """
+
         if self.model is None or self.processor is None:
             raise RuntimeError("Model not loaded. Call load_model() first.")
         
@@ -112,7 +94,6 @@ class LlamaInference(BaseInference):
         ).to(self.model.device)
         
         # Filter valid generation parameters
-        # Remove custom parameters like 'encourage_deeper_explanation'
         valid_params = {
             "max_new_tokens": max_new_tokens,
             "temperature": temperature,
@@ -122,12 +103,10 @@ class LlamaInference(BaseInference):
             "repetition_penalty": kwargs.get("repetition_penalty"),
             "num_beams": kwargs.get("num_beams"),
         }
-        # Remove None values
         generate_kwargs = {k: v for k, v in valid_params.items() if v is not None}
         
         outputs = self.model.generate(**inputs, **generate_kwargs)
         
-        # Decode response
         response = self.processor.batch_decode(
             outputs[:, inputs["input_ids"].shape[-1]:]
         )[0]
@@ -139,19 +118,12 @@ class LlamaInference(BaseInference):
         }
     
     def _format_messages(self, messages: List[Dict], images: List[str]) -> List[Dict]:
-        """
-        Format messages for the model.
-        
-        Handles both text and image content in messages.
-        """
         formatted = []
         
         for msg in messages:
             if isinstance(msg.get("content"), list):
-                # Content is already a list (multi-modal)
                 formatted.append(msg)
             else:
-                # Simple text message
                 formatted.append({
                     "role": msg.get("role", "user"),
                     "content": [
@@ -159,7 +131,6 @@ class LlamaInference(BaseInference):
                     ]
                 })
         
-        # Add images to the last user message
         if images and formatted:
             last_msg = formatted[-1]
             if isinstance(last_msg.get("content"), list):

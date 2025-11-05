@@ -225,7 +225,8 @@ def main():
     parser.add_argument(
         "--question",
         type=str,
-        help="Specific question to evaluate (optional)"
+        nargs='+',
+        help="Specific question(s) to evaluate (can specify multiple, space-separated or comma-separated)"
     )
     parser.add_argument(
         "--output",
@@ -264,12 +265,28 @@ def main():
                 print(f"Error: Unknown model: {args.model}")
                 return
             
-            benchmark.run_evaluation(
-                model_name=args.model,
-                model_type=model_config["type"],
-                learner_profile=args.profile,
-                question_id=args.question
-            )
+            # Parse questions: handle both space-separated and comma-separated
+            questions = []
+            for q in args.question:
+                # Split by comma if comma-separated
+                if ',' in q:
+                    questions.extend([q.strip() for q in q.split(',') if q.strip()])
+                else:
+                    questions.append(q.strip())
+            
+            # Run evaluation for each question
+            for question_id in questions:
+                try:
+                    benchmark.run_evaluation(
+                        model_name=args.model,
+                        model_type=model_config["type"],
+                        learner_profile=args.profile,
+                        question_id=question_id
+                    )
+                    print(f"✓ Completed: {args.model} - {args.profile} - {question_id}\n")
+                except Exception as e:
+                    print(f"✗ Failed: {args.model} - {args.profile} - {question_id}")
+                    print(f"  Error: {str(e)}\n")
         else:
             print("Specify --model, --profile, and --question, or use --full for full evaluation")
 
