@@ -32,10 +32,14 @@ def run_single_evaluation(model_name: str, learner_profile: str, question_id: st
 
 
 def run_grade_evaluation(grade: int):
-    from data.learner_profiles import get_profiles_by_grade
+    from prompts.user_prompts import LEARNER_PROFILE_CONFIGS
     from data.question_data import get_questions_by_grade
     
-    learner_profiles = get_profiles_by_grade(grade)
+    # Filter profiles by grade
+    learner_profiles = {
+        k: v for k, v in LEARNER_PROFILE_CONFIGS.items()
+        if v.get("grade") == grade
+    }
     questions = get_questions_by_grade(grade)
     
     print(f"\n{'='*60}")

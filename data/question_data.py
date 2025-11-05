@@ -1,58 +1,62 @@
-"""
-Question data for TIMSS 2019 mathematics questions.
-
-Note: Actual TIMSS question data should be added here based on TIMSS database.
-"""
-
 # Grade 4 Questions
-# Domain: Number, Measurement, Data
 GRADE4_QUESTIONS = {
     "G4Q1": {
-        "question_number": "TIMSS-2019-4-M01",
-        "domain": "number",
-        "description": "Place value and number operations",
-        "image_path": "pics/grade4_q1.png"
+        "question_number": "G4M041291",
+        # "domain": "number",
+        # "description": "Place value and number operations",
+        "image_path": "pics/G4M041291.png"
     },
     "G4Q2": {
-        "question_number": "TIMSS-2019-4-M02",
-        "domain": "measurement",
-        "description": "Measuring and comparing lengths",
-        "image_path": "pics/grade4_q2.png"
+        "question_number": "G4M041298",
+        # "domain": "measurement",
+        # "description": "Measuring and comparing lengths",
+        "image_path": "pics/G4M041298.png"
     },
     "G4Q3": {
-        "question_number": "TIMSS-2019-4-M03",
-        "domain": "data",
-        "description": "Reading and interpreting data from graphs",
-        "image_path": "pics/grade4_q3.png"
+        "question_number": "G4M051093",
+        # "domain": "data",
+        # "description": "Reading and interpreting data from graphs",
+        "image_path": "pics/G4M051093.png"
+    },
+    "G4Q4": {
+        "question_number": "G4M051140",
+        # "domain": "data",
+        # "description": "Data analysis",
+        "image_path": "pics/G4M051140.png"
     }
 }
 
 # Grade 8 Questions
-# Domain: Number, Algebra, Geometry and Measurement, Data and Probability
 GRADE8_QUESTIONS = {
     "G8Q1": {
-        "question_number": "TIMSS-2019-8-M01",
-        "domain": "number",
-        "description": "Operations with rational numbers",
-        "image_path": "pics/grade8_q1.png"
+        "question_number": "G8MP62335",
+        # "domain": "number",
+        # "description": "Operations with rational numbers",
+        "image_path": "pics/G8MP62335.png"
     },
     "G8Q2": {
-        "question_number": "TIMSS-2019-8-M02",
-        "domain": "algebra",
-        "description": "Linear equations and expressions",
-        "image_path": "pics/grade8_q2.png"
+        "question_number": "G8MP72025",
+        # "domain": "algebra",
+        # "description": "Linear equations and expressions",
+        "image_path": "pics/G8MP72025.png"
     },
     "G8Q3": {
-        "question_number": "TIMSS-2019-8-M03",
-        "domain": "geometry_measurement",
-        "description": "Geometric properties and measurement",
-        "image_path": "pics/grade8_q3.png"
+        "question_number": "G8MP72076",
+        # "domain": "geometry_measurement",
+        # "description": "Geometric properties and measurement",
+        "image_path": "pics/G8MP72076.png"
     },
     "G8Q4": {
-        "question_number": "TIMSS-2019-8-M04",
-        "domain": "data_probability",
-        "description": "Data analysis and probability",
-        "image_path": "pics/grade8_q4.png"
+        "question_number": "G8MP72121",
+        # "domain": "data_probability",
+        # "description": "Data analysis and probability",
+        "image_path": "pics/G8MP72121.png"
+    },
+    "G8Q5": {
+        "question_number": "G8MP72209",
+        # "domain": "data_probability",
+        # "description": "Data analysis and probability",
+        "image_path": "pics/G8MP72209.png"
     }
 }
 
@@ -89,18 +93,18 @@ def get_questions_by_grade(grade: int) -> dict:
         return {}
 
 
-def get_questions_by_domain(domain: str) -> dict:
-    """
-    Get all questions for a specific domain.
-    
-    Args:
-        domain: Mathematics domain
-        
-    Returns:
-        Dictionary of questions for the domain
-    """
-    all_questions = {**GRADE4_QUESTIONS, **GRADE8_QUESTIONS}
-    return {
-        k: v for k, v in all_questions.items()
-        if v.get("domain") == domain
-    }
+# def get_questions_by_domain(domain: str) -> dict:
+#     """
+#     Get all questions for a specific domain.
+#     
+#     Args:
+#         domain: Mathematics domain
+#         
+#     Returns:
+#         Dictionary of questions for the domain
+#     """
+#     all_questions = {**GRADE4_QUESTIONS, **GRADE8_QUESTIONS}
+#     return {
+#         k: v for k, v in all_questions.items()
+#         if v.get("domain") == domain
+#     }

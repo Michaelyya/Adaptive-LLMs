@@ -1,6 +1,3 @@
-"""
-Inference module for Llama vision models.
-"""
 import torch
 from transformers import AutoProcessor, AutoModelForVision2Seq
 from pathlib import Path

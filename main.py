@@ -7,11 +7,10 @@ from typing import List, Dict
 from inference.llama_inference import create_llama_inference
 from inference.openai_inference import create_openai_inference
 
-from prompts.system_prompts import get_system_prompt, AVAILABLE_PROFILES
-from prompts.user_prompts import create_user_prompt
+from prompts.system_prompts import get_system_prompt_by_grade
+from prompts.user_prompts import LEARNER_PROFILE_CONFIGS, get_user_prompt
 from prompts.parameters import get_generation_params
 
-from data.learner_profiles import get_learner_profile, get_all_profiles
 from data.question_data import get_question, get_questions_by_grade
 
 
@@ -55,14 +54,15 @@ class AdaptiveLearningBenchmark:
         print(f"Question: {question_id}")
         print(f"{'='*60}\n")
         
-        learner_data = get_learner_profile(learner_profile)
+        learner_data = LEARNER_PROFILE_CONFIGS.get(learner_profile, {})
+        if not learner_data:
+            raise ValueError(f"Unknown learner profile: {learner_profile}")
+        
         question_data = get_question(question_id)
         
-        system_prompt = get_system_prompt(learner_profile)
-        user_prompt = create_user_prompt(
-            question_data["question_number"],
-            question_data.get("description", "")
-        )
+        # Use grade-specific system prompt for concise, targeted guidance
+        system_prompt = get_system_prompt_by_grade(learner_data.get("grade"))
+        user_prompt = get_user_prompt(learner_profile)
         
         generation_params = get_generation_params(learner_profile)
         
@@ -146,8 +146,8 @@ class AdaptiveLearningBenchmark:
         print("STARTING FULL EVALUATION")
         print(f"{'='*60}\n")
         
-        # Get all learner profiles
-        learner_profiles = AVAILABLE_PROFILES
+        # Get all learner profiles (using the 6 profiles from user_prompts)
+        learner_profiles = list(LEARNER_PROFILE_CONFIGS.keys())
         
         # Run evaluation for each combination
         for model_config in models:
@@ -155,7 +155,9 @@ class AdaptiveLearningBenchmark:
             model_type = model_config["type"]
             
             for profile in learner_profiles:
-                learner_data = get_learner_profile(profile)
+                learner_data = LEARNER_PROFILE_CONFIGS.get(profile, {})
+                if not learner_data:
+                    continue
                 grade = learner_data["grade"]
                 
                 # Get questions for this grade
@@ -176,7 +178,6 @@ class AdaptiveLearningBenchmark:
                         print(f"✗ Failed: {model_name} - {profile} - {question_id}")
                         print(f"  Error: {str(e)}\n")
         
-        # Save summary
         if save_summary:
             self.save_summary()
         
@@ -186,7 +187,6 @@ class AdaptiveLearningBenchmark:
         print(f"{'='*60}\n")
     
     def save_summary(self):
-        """Save a summary of all results."""
         summary = {
             "total_evaluations": len(self.results),
             "timestamp": datetime.now().isoformat(),
@@ -209,7 +209,6 @@ class AdaptiveLearningBenchmark:
 
 
 def main():
-    """Main entry point for the script."""
     parser = argparse.ArgumentParser(
         description="Run adaptive learning LLM benchmark"
     )
