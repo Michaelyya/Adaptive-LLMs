@@ -3,6 +3,8 @@ from transformers import AutoProcessor, AutoModelForVision2Seq
 from pathlib import Path
 from typing import Dict, List, Optional
 from .base_inference import BaseInference, load_image
+from config import HUGGINGFACE_TOKEN
+
 
 
 class LlamaInference(BaseInference):   
@@ -30,30 +32,34 @@ class LlamaInference(BaseInference):
         self._validate_model()
     
     def _validate_model(self):
-        """Validate that the model is supported."""
         if self.model_name not in self.MODEL_CONFIGS:
             raise ValueError(f"Unsupported model: {self.model_name}")
     
     def load_model(self):
         config = self.MODEL_CONFIGS[self.model_name]
         
-        if config["processor_class"] == "AutoProcessor":
-            self.processor = AutoProcessor.from_pretrained(self.model_name)
-        else:
-            from transformers import AutoProcessor
-            self.processor = AutoProcessor.from_pretrained(self.model_name)
+        token = HUGGINGFACE_TOKEN
+        token_kwargs = {"token": token} if token else {}
         
-        if config["processor_class"] == "AutoProcessor":
+        self.processor = AutoProcessor.from_pretrained(
+            self.model_name,
+            **token_kwargs
+        )
+        
+        # Load model based on model_class
+        if config["model_class"] == "AutoModelForVision2Seq":
             self.model = AutoModelForVision2Seq.from_pretrained(
                 self.model_name,
                 device_map=self.device_map,
                 torch_dtype=torch.bfloat16,
+                **token_kwargs
             )
         elif "Llama4ForConditionalGeneration" in config.get("model_class", ""):
             from transformers import Llama4ForConditionalGeneration
             kwargs = {
                 "device_map": self.device_map,
                 "torch_dtype": torch.bfloat16,
+                **token_kwargs
             }
             if "special_attn" in config:
                 kwargs["attn_implementation"] = config["special_attn"]
@@ -62,6 +68,8 @@ class LlamaInference(BaseInference):
                 self.model_name,
                 **kwargs
             )
+        else:
+            raise ValueError(f"Unsupported model class: {config.get('model_class')}")
     
     def generate(
         self,
@@ -75,7 +83,6 @@ class LlamaInference(BaseInference):
         if self.model is None or self.processor is None:
             raise RuntimeError("Model not loaded. Call load_model() first.")
         
-        # Process images
         processed_images = []
         if images:
             for img in images:
@@ -144,7 +151,6 @@ class LlamaInference(BaseInference):
 
 
 def create_llama_inference(model_name: str) -> LlamaInference:
-    """Factory function to create a Llama inference instance."""
     inference = LlamaInference(model_name)
     inference.load_model()
     return inference

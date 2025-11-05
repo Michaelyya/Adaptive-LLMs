@@ -1,3 +1,4 @@
+gh repo clone Michaelyya/Adaptive-LLMs
 """
 Configuration file for the adaptive learning benchmark.
 """
@@ -57,7 +58,7 @@ MODELS = {
 
 # API Keys (set via environment variables)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN", "")
+HUGGINGFACE_TOKEN = os.getenv("Huggingface_API_KEY", "")
 
 # Device configuration
 DEVICE = "auto"  # or "cuda", "cpu", "mps"
