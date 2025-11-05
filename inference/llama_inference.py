@@ -5,8 +5,6 @@ from typing import Dict, List, Optional
 from .base_inference import BaseInference, load_image
 from config import HUGGINGFACE_TOKEN
 
-
-
 class LlamaInference(BaseInference):   
     MODEL_CONFIGS = {
         "meta-llama/Llama-3.2-11B-Vision-Instruct": {

@@ -1,8 +1,3 @@
-gh repo clone Michaelyya/Adaptive-LLMs
-"""
-Configuration file for the adaptive learning benchmark.
-"""
-
 import os
 from pathlib import Path
 
