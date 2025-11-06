@@ -5,6 +5,13 @@ from typing import Dict, List, Optional
 from .base_inference import BaseInference, load_image
 from config import HUGGINGFACE_TOKEN
 
+# Try to get token from huggingface_hub if not set in config
+try:
+    from huggingface_hub import HfFolder
+    _hf_token = HfFolder.get_token()
+except (ImportError, Exception):
+    _hf_token = None
+
 class LlamaInference(BaseInference):   
     MODEL_CONFIGS = {
         "meta-llama/Llama-3.2-11B-Vision-Instruct": {
@@ -36,8 +43,16 @@ class LlamaInference(BaseInference):
     def load_model(self):
         config = self.MODEL_CONFIGS[self.model_name]
         
-        token = HUGGINGFACE_TOKEN
+        # Get token from config, or fallback to huggingface_hub saved token
+        token = HUGGINGFACE_TOKEN or _hf_token
+        
+        if not token:
+            print("Warning: No Hugging Face token found. Set Huggingface_API_KEY or HUGGINGFACE_TOKEN environment variable, or login with: huggingface-cli login")
+        
         token_kwargs = {"token": token} if token else {}
+        
+        if token:
+            print(f"Using Hugging Face token (length: {len(token)})")
         
         self.processor = AutoProcessor.from_pretrained(
             self.model_name,
