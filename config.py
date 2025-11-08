@@ -1,5 +1,9 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Base paths
 PROJECT_ROOT = Path(__file__).parent
@@ -51,9 +55,10 @@ MODELS = {
     ]
 }
 
-# API Keys (set via environment variables)
+
+# API Keys - loaded from .env file or environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-HUGGINGFACE_TOKEN = os.getenv("Huggingface_API_KEY", "")
+HUGGINGFACE_TOKEN = os.getenv("Huggingface_API_KEY", "") or os.getenv("HUGGINGFACE_TOKEN", "")
 
 # Device configuration
 DEVICE = "auto"  # or "cuda", "cpu", "mps"

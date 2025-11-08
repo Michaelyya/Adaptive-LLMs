@@ -56,7 +56,7 @@ class OpenAInference(BaseInference):
         messages: List[Dict],
         images: Optional[List[str]] = None,
         max_new_tokens: int = 512,
-        temperature: float = 0.7,
+        temperature: float = 1,
         **kwargs
     ) -> Dict:
         formatted_messages = []
@@ -77,9 +77,13 @@ class OpenAInference(BaseInference):
                     "role": role,
                     "content": content
                 })
+            requires_max_completion_tokens = (
+            self.model_name.startswith("gpt-5") or 
+            self.model_name.startswith("o1") or
+            "2025" in self.model_name  # Models with 2025 in name typically need max_completion_tokens
+        )
         
         valid_params = {
-            "max_tokens": max_new_tokens,
             "temperature": temperature,
             "top_p": kwargs.get("top_p"),
             "frequency_penalty": kwargs.get("frequency_penalty"),
@@ -87,6 +91,7 @@ class OpenAInference(BaseInference):
             "stream": kwargs.get("stream"),
             "stop": kwargs.get("stop"),
         }
+                
         valid_params = {k: v for k, v in valid_params.items() if v is not None}
         
         response = self.client.chat.completions.create(

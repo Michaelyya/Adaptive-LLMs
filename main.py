@@ -9,7 +9,7 @@ from inference.openai_inference import create_openai_inference
 
 from prompts.system_prompts import get_system_prompt_by_grade
 from prompts.user_prompts import LEARNER_PROFILE_CONFIGS, get_user_prompt
-from prompts.parameters import get_generation_params
+# from prompts.parameters import get_generation_params
 
 from data.question_data import get_question, get_questions_by_grade
 
@@ -64,7 +64,7 @@ class AdaptiveLearningBenchmark:
         system_prompt = get_system_prompt_by_grade(learner_data.get("grade"))
         user_prompt = get_user_prompt(learner_profile)
         
-        generation_params = get_generation_params(learner_profile)
+        # generation_params = get_generation_params(learner_profile)
         
         # Prepare messages
         image_paths = [question_data["image_path"]]
@@ -76,14 +76,14 @@ class AdaptiveLearningBenchmark:
             result = inference.generate(
                 messages=messages,
                 images=image_paths,
-                **generation_params
+                # **generation_params
             )
         elif model_type == "openai":
             inference = create_openai_inference(model_name)
             result = inference.generate(
                 messages=messages,
                 images=image_paths,
-                **generation_params
+                # **generation_params
             )
         else:
             raise ValueError(f"Unknown model type: {model_type}")
@@ -99,7 +99,7 @@ class AdaptiveLearningBenchmark:
             "question_data": question_data,
             "system_prompt": system_prompt,
             "user_prompt": user_prompt,
-            "generation_params": generation_params,
+            # "generation_params": generation_params,
             "response": result["response"],
             "metadata": {
                 k: v for k, v in result.items() if k != "response"
@@ -220,7 +220,8 @@ def main():
     parser.add_argument(
         "--profile",
         type=str,
-        help="Specific learner profile to evaluate (optional)"
+        nargs='+',
+        help="Specific learner profile(s) to evaluate (can specify multiple, space-separated or comma-separated)"
     )
     parser.add_argument(
         "--question",
@@ -265,6 +266,15 @@ def main():
                 print(f"Error: Unknown model: {args.model}")
                 return
             
+            # Parse profiles: handle both space-separated and comma-separated
+            profiles = []
+            for p in args.profile:
+                # Split by comma if comma-separated
+                if ',' in p:
+                    profiles.extend([p.strip() for p in p.split(',') if p.strip()])
+                else:
+                    profiles.append(p.strip())
+            
             # Parse questions: handle both space-separated and comma-separated
             questions = []
             for q in args.question:
@@ -274,22 +284,24 @@ def main():
                 else:
                     questions.append(q.strip())
             
-            # Run evaluation for each question
-            for question_id in questions:
-                try:
-                    benchmark.run_evaluation(
-                        model_name=args.model,
-                        model_type=model_config["type"],
-                        learner_profile=args.profile,
-                        question_id=question_id
-                    )
-                    print(f"✓ Completed: {args.model} - {args.profile} - {question_id}\n")
-                except Exception as e:
-                    print(f"✗ Failed: {args.model} - {args.profile} - {question_id}")
-                    print(f"  Error: {str(e)}\n")
+            # Run evaluation for each combination of profile and question
+            for profile in profiles:
+                for question_id in questions:
+                    try:
+                        benchmark.run_evaluation(
+                            model_name=args.model,
+                            model_type=model_config["type"],
+                            learner_profile=profile,
+                            question_id=question_id
+                        )
+                        print(f"✓ Completed: {args.model} - {profile} - {question_id}\n")
+                    except Exception as e:
+                        print(f"✗ Failed: {args.model} - {profile} - {question_id}")
+                        print(f"  Error: {str(e)}\n")
         else:
             print("Specify --model, --profile, and --question, or use --full for full evaluation")
 
 
 if __name__ == "__main__":
     main()
+
