@@ -11,7 +11,7 @@ class LlamaInference(BaseInference):
             "processor_class": "AutoProcessor",
             "model_class": "AutoModelForVision2Seq"
         },
-        "meta-llama/Llama-3.2-90B-Vision": {
+        "meta-llama/Llama-3.2-90B-Vision-Instruct": {
             "processor_class": "AutoProcessor",
             "model_class": "AutoModelForVision2Seq"
         },

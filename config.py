@@ -26,7 +26,7 @@ MODELS = {
             "description": "Llama 3.2 11B Vision Instruct"
         },
         {
-            "name": "meta-llama/Llama-3.2-90B-Vision",
+            "name": "meta-llama/Llama-3.2-90B-Vision-Instruct",
             "type": "llama",
             "description": "Llama 3.2 90B Vision"
         },

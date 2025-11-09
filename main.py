@@ -246,7 +246,7 @@ def main():
     # Define models to evaluate
     models = [
         {"name": "meta-llama/Llama-3.2-11B-Vision-Instruct", "type": "llama"},
-        {"name": "meta-llama/Llama-3.2-90B-Vision", "type": "llama"},
+        {"name": "meta-llama/Llama-3.2-90B-Vision-Instruct", "type": "llama"},
         {"name": "meta-llama/Llama-4-Scout-17B-16E-Instruct", "type": "llama"},
         {"name": "gpt-4o", "type": "openai"},
         {"name": "gpt-5", "type": "openai"},
