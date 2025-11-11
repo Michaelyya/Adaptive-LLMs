@@ -113,6 +113,66 @@ class AdaptiveLearningBenchmark:
         self.results.append(evaluation_result)
         return evaluation_result
     
+    def run_evaluation_with_inference(
+        self,
+        inference,
+        model_name: str,
+        model_type: str,
+        learner_profile: str,
+        question_id: str,
+        save_intermediate: bool = True
+    ) -> Dict:
+        """Run evaluation using a pre-loaded inference instance (for memory efficiency)."""
+        print(f"\n{'='*60}")
+        print(f"Evaluating: {model_name}")
+        print(f"Learner: {learner_profile}")
+        print(f"Question: {question_id}")
+        print(f"{'='*60}\n")
+        
+        learner_data = LEARNER_PROFILE_CONFIGS.get(learner_profile, {})
+        if not learner_data:
+            raise ValueError(f"Unknown learner profile: {learner_profile}")
+        
+        question_data = get_question(question_id)
+        
+        # Use grade-specific system prompt for concise, targeted guidance
+        system_prompt = get_system_prompt_by_grade(learner_data.get("grade"))
+        user_prompt = get_user_prompt(learner_profile)
+        
+        # Prepare messages
+        image_paths = [question_data["image_path"]]
+        messages = self.create_messages(system_prompt, user_prompt, image_paths)
+        
+        # Use pre-loaded inference instance
+        result = inference.generate(
+            messages=messages,
+            images=image_paths,
+        )
+        
+        # Prepare result
+        evaluation_result = {
+            "timestamp": datetime.now().isoformat(),
+            "model": model_name,
+            "model_type": model_type,
+            "learner_profile": learner_profile,
+            "learner_data": learner_data,
+            "question_id": question_id,
+            "question_data": question_data,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "response": result["response"],
+            "metadata": {
+                k: v for k, v in result.items() if k != "response"
+            }
+        }
+        
+        # Save intermediate result if requested
+        if save_intermediate:
+            self.save_result(evaluation_result)
+        
+        self.results.append(evaluation_result)
+        return evaluation_result
+    
     def save_result(self, result: Dict):
         """Save a single result to a JSON file."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -284,20 +344,37 @@ def main():
                 else:
                     questions.append(q.strip())
             
-            # Run evaluation for each combination of profile and question
-            for profile in profiles:
-                for question_id in questions:
-                    try:
-                        benchmark.run_evaluation(
-                            model_name=args.model,
-                            model_type=model_config["type"],
-                            learner_profile=profile,
-                            question_id=question_id
-                        )
-                        print(f"✓ Completed: {args.model} - {profile} - {question_id}\n")
-                    except Exception as e:
-                        print(f"✗ Failed: {args.model} - {profile} - {question_id}")
-                        print(f"  Error: {str(e)}\n")
+            # Reuse model instance for multiple evaluations to save memory
+            inference = None
+            try:
+                # Load model once for all evaluations
+                if model_config["type"] == "llama":
+                    from inference.llama_inference import create_llama_inference
+                    inference = create_llama_inference(args.model)
+                elif model_config["type"] == "openai":
+                    from inference.openai_inference import create_openai_inference
+                    inference = create_openai_inference(args.model)
+                
+                # Run evaluation for each combination of profile and question
+                for profile in profiles:
+                    for question_id in questions:
+                        try:
+                            # Use the pre-loaded model instance
+                            result = benchmark.run_evaluation_with_inference(
+                                inference=inference,
+                                model_name=args.model,
+                                model_type=model_config["type"],
+                                learner_profile=profile,
+                                question_id=question_id
+                            )
+                            print(f"✓ Completed: {args.model} - {profile} - {question_id}\n")
+                        except Exception as e:
+                            print(f"✗ Failed: {args.model} - {profile} - {question_id}")
+                            print(f"  Error: {str(e)}\n")
+            finally:
+                # Clean up model after all evaluations
+                if inference and hasattr(inference, 'cleanup'):
+                    inference.cleanup()
         else:
             print("Specify --model, --profile, and --question, or use --full for full evaluation")
 
