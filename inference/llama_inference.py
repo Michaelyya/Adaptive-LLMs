@@ -11,14 +11,9 @@ class LlamaInference(BaseInference):
             "processor_class": "AutoProcessor",
             "model_class": "AutoModelForVision2Seq"
         },
-        "meta-llama/Llama-3.2-90B-Vision-Instruct": {
+        "Qwen/Qwen3-VL-30B-A3B-Instruct": {
             "processor_class": "AutoProcessor",
             "model_class": "AutoModelForVision2Seq"
-        },
-        "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
-            "processor_class": "AutoProcessor",
-            "model_class": "Llama4ForConditionalGeneration",
-            "special_attn": "flex_attention"
         }
     }
     
@@ -51,20 +46,6 @@ class LlamaInference(BaseInference):
                 device_map=self.device_map,
                 torch_dtype=torch.bfloat16,
                 **token_kwargs
-            )
-        elif "Llama4ForConditionalGeneration" in config.get("model_class", ""):
-            from transformers import Llama4ForConditionalGeneration
-            kwargs = {
-                "device_map": self.device_map,
-                "torch_dtype": torch.bfloat16,
-                **token_kwargs
-            }
-            if "special_attn" in config:
-                kwargs["attn_implementation"] = config["special_attn"]
-            
-            self.model = Llama4ForConditionalGeneration.from_pretrained(
-                self.model_name,
-                **kwargs
             )
         else:
             raise ValueError(f"Unsupported model class: {config.get('model_class')}")

@@ -77,10 +77,12 @@ class OpenAInference(BaseInference):
                     "role": role,
                     "content": content
                 })
-            requires_max_completion_tokens = (
+        
+        # Check if model requires max_completion_tokens instead of max_tokens
+        requires_max_completion_tokens = (
             self.model_name.startswith("gpt-5") or 
             self.model_name.startswith("o1") or
-            "2025" in self.model_name  # Models with 2025 in name typically need max_completion_tokens
+            "2025" in self.model_name
         )
         
         valid_params = {
@@ -91,6 +93,12 @@ class OpenAInference(BaseInference):
             "stream": kwargs.get("stream"),
             "stop": kwargs.get("stop"),
         }
+        
+        # Use appropriate parameter name based on model
+        if requires_max_completion_tokens:
+            valid_params["max_completion_tokens"] = max_new_tokens
+        else:
+            valid_params["max_tokens"] = max_new_tokens
                 
         valid_params = {k: v for k, v in valid_params.items() if v is not None}
         
