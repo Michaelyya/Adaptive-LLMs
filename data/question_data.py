@@ -23,6 +23,12 @@ GRADE4_QUESTIONS = {
         # "domain": "data",
         # "description": "Data analysis",
         "image_path": "pics/G4M051140.png"
+    },
+    "G4Q5": {
+        "question_number": "G4M051147",
+        # "domain": "data",
+        # "description": "Data analysis",
+        "image_path": "pics/G4M051147.png"
     }
 }
 
