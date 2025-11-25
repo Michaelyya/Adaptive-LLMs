@@ -1,8 +1,3 @@
-"""
-System prompts for adaptive learning mathematics instruction.
-Separated into concise base and grade-specific prompts.
-"""
-
 BASE_DIRECTIVE = (
     "You are a mathematics instructor capable of teaching both Grade 4 and Grade 8 students. "
     "Automatically adjust your mathematical language, explanations, and examples to match the "
@@ -72,7 +67,6 @@ TIMSS_NOTE = (
 
 
 def get_system_prompt_by_grade(grade: int) -> str:
-    """Return a concise, grade-specific system prompt."""
     if grade == 4:
         return f"{BASE_DIRECTIVE}\n\n{GRADE4_PROMPT}\n\n{TIMSS_NOTE}"
     if grade == 8:
@@ -81,7 +75,6 @@ def get_system_prompt_by_grade(grade: int) -> str:
 
 
 def get_system_prompt() -> str:
-    """Return the base directive (no grade-specific content)."""
     return BASE_DIRECTIVE
 
 

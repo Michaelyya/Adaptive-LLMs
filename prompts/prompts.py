@@ -1,6 +1,3 @@
-# Unified prompts for adaptive learning mathematics instruction
-# Supports 4 groups with different prompt configurations
-
 BASE_DIRECTIVE = (
     "You are a mathematics instructor capable of teaching both Grade 4 and Grade 8 students. "
     "Automatically adjust your mathematical language, explanations, and examples to match the "

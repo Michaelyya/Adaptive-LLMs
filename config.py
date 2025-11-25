@@ -26,22 +26,12 @@ MODELS = {
             "description": "Llama 3.2 11B Vision Instruct"
         },
         {
-            "name": "meta-llama/Llama-3.2-90B-Vision-Instruct",
+            "name": "Qwen/Qwen3-VL-30B-A3B-Instruct",
             "type": "llama",
-            "description": "Llama 3.2 90B Vision"
-        },
-        {
-            "name": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
-            "type": "llama",
-            "description": "Llama 4 Scout 17B 16E Instruct"
+            "description": "Qwen3 VL 30B A3B Instruct"
         }
     ],
     "openai": [
-        {
-            "name": "gpt-4o",
-            "type": "openai",
-            "description": "GPT-4 Optimized"
-        },
         {
             "name": "gpt-5",
             "type": "openai",
@@ -52,12 +42,20 @@ MODELS = {
             "type": "openai",
             "description": "O1"
         }
+    ],
+    "claude": [
+        {
+            "name": "claude-sonnet-4-20250514",
+            "type": "claude",
+            "description": "Claude Sonnet 4"
+        }
     ]
 }
 
 
 # API Keys - loaded from .env file or environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 HUGGINGFACE_TOKEN = os.getenv("Huggingface_API_KEY", "") or os.getenv("HUGGINGFACE_TOKEN", "")
 
 # Device configuration

@@ -1,7 +1,3 @@
-"""
-Parameters and constants for the adaptive learning benchmark.
-"""
-
 # Generation parameters
 GENERATION_PARAMS = {
     "max_new_tokens": 512,

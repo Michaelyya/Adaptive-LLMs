@@ -1,68 +1,68 @@
 # Grade 4 Questions
 GRADE4_QUESTIONS = {
     "G4Q1": {
-        "question_number": "G4M041291",
+        "question_number": "G4Q1",
         # "domain": "number",
         # "description": "Place value and number operations",
-        "image_path": "pics/G4M041291.png"
+        "image_path": "pics/G4Q1.PNG"
     },
     "G4Q2": {
-        "question_number": "G4M041298",
+        "question_number": "G4Q2",
         # "domain": "measurement",
         # "description": "Measuring and comparing lengths",
-        "image_path": "pics/G4M041298.png"
+        "image_path": "pics/G4Q2.PNG"
     },
     "G4Q3": {
-        "question_number": "G4M051093",
+        "question_number": "G4Q3",
         # "domain": "data",
         # "description": "Reading and interpreting data from graphs",
-        "image_path": "pics/G4M051093.png"
+        "image_path": "pics/G4Q3.PNG"
     },
     "G4Q4": {
-        "question_number": "G4M051140",
+        "question_number": "G4Q4",
         # "domain": "data",
         # "description": "Data analysis",
-        "image_path": "pics/G4M051140.png"
+        "image_path": "pics/G4Q4.PNG"
     },
     "G4Q5": {
-        "question_number": "G4M051147",
+        "question_number": "G4Q5",
         # "domain": "data",
         # "description": "Data analysis",
-        "image_path": "pics/G4M051147.png"
+        "image_path": "pics/G4Q5.png"
     }
 }
 
 # Grade 8 Questions
 GRADE8_QUESTIONS = {
     "G8Q1": {
-        "question_number": "G8MP62335",
+        "question_number": "G8Q1",
         # "domain": "number",
         # "description": "Operations with rational numbers",
-        "image_path": "pics/G8MP62335.png"
+        "image_path": "pics/G8Q1.PNG"
     },
     "G8Q2": {
-        "question_number": "G8MP72025",
+        "question_number": "G8Q2",
         # "domain": "algebra",
         # "description": "Linear equations and expressions",
-        "image_path": "pics/G8MP72025.png"
+        "image_path": "pics/G8Q2.PNG"
     },
     "G8Q3": {
-        "question_number": "G8MP72076",
+        "question_number": "G8Q3",
         # "domain": "geometry_measurement",
         # "description": "Geometric properties and measurement",
-        "image_path": "pics/G8MP72076.png"
+        "image_path": "pics/G8Q3.PNG"
     },
     "G8Q4": {
-        "question_number": "G8MP72121",
+        "question_number": "G8Q4",
         # "domain": "data_probability",
         # "description": "Data analysis and probability",
-        "image_path": "pics/G8MP72121.png"
+        "image_path": "pics/G8Q4.png"
     },
     "G8Q5": {
-        "question_number": "G8MP72209",
+        "question_number": "G8Q5",
         # "domain": "data_probability",
         # "description": "Data analysis and probability",
-        "image_path": "pics/G8MP72209.png"
+        "image_path": "pics/G8Q5.png"
     }
 }
 

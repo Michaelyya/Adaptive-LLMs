@@ -94,11 +94,11 @@ class OpenAInference(BaseInference):
             "stop": kwargs.get("stop"),
         }
         
-        # Use appropriate parameter name based on model
-        if requires_max_completion_tokens:
-            valid_params["max_completion_tokens"] = max_new_tokens
-        else:
-            valid_params["max_tokens"] = max_new_tokens
+        # # Use appropriate parameter name based on model
+        # if requires_max_completion_tokens:
+        #     valid_params["max_completion_tokens"] = max_new_tokens
+        # else:
+        #     valid_params["max_tokens"] = max_new_tokens
                 
         valid_params = {k: v for k, v in valid_params.items() if v is not None}
         
