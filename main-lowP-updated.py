@@ -75,9 +75,9 @@ class AdaptiveLearningBenchmark:
         result = inference.generate(messages=messages, images=image_paths)
         first_response = result["response"]
         
-        # Special handling for profile_2: two-round conversation
-        if learner_profile == "profile_2":
-            print("Profile 2 detected: Running second round with 'I don't understand'...")
+        # Special handling for profile_2 and profile_5: two-round conversation
+        if learner_profile == "profile_2" or learner_profile == "profile_5":
+            print(f"{learner_profile} detected: Running second round with 'I don't understand'...")
             
             # Build conversation history for second round
             messages_round2 = messages.copy()
@@ -163,9 +163,9 @@ class AdaptiveLearningBenchmark:
         result = inference.generate(messages=messages, images=image_paths)
         first_response = result["response"]
         
-        # Special handling for profile_2: two-round conversation
-        if learner_profile == "profile_2":
-            print("Profile 2 detected: Running second round with 'I don't understand'...")
+        # Special handling for profile_2 and profile_5: two-round conversation
+        if learner_profile == "profile_2" or learner_profile == "profile_5":
+            print(f"{learner_profile} detected: Running second round with 'I don't understand'...")
             
             # Build conversation history for second round
             # Add assistant's first response, then user's "I don't understand"
