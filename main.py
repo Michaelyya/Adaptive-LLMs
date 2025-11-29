@@ -6,7 +6,7 @@ from typing import List, Dict
 
 from inference.llama_inference import create_llama_inference
 from inference.openai_inference import create_openai_inference
-from inference.claude_inference import create_claude_inference
+from inference.gemini_inference import create_gemini_inference
 
 from prompts.prompts import get_prompts_by_group, LEARNER_PROFILE_CONFIGS
 from data.question_data import get_question, get_questions_by_grade
@@ -69,8 +69,8 @@ class AdaptiveLearningBenchmark:
         elif model_type == "openai":
             inference = create_openai_inference(model_name)
             result = inference.generate(messages=messages, images=image_paths)
-        elif model_type == "claude":
-            inference = create_claude_inference(model_name)
+        elif model_type == "gemini":
+            inference = create_gemini_inference(model_name)
             result = inference.generate(messages=messages, images=image_paths)
         else:
             raise ValueError(f"Unknown model type: {model_type}")
@@ -242,7 +242,7 @@ def main():
         {"name": "gpt-4o", "type": "openai"},
         {"name": "gpt-5", "type": "openai"},
         {"name": "o1", "type": "openai"},
-        {"name": "claude-sonnet-4-20250514", "type": "claude"},
+        {"name": "gemini-2.5-pro", "type": "gemini"},
     ]
     
     benchmark = AdaptiveLearningBenchmark(output_dir=args.output)
@@ -292,8 +292,8 @@ def main():
                 inference = create_llama_inference(args.model)
             elif model_config["type"] == "openai":
                 inference = create_openai_inference(args.model)
-            elif model_config["type"] == "claude":
-                inference = create_claude_inference(args.model)
+            elif model_config["type"] == "gemini":
+                inference = create_gemini_inference(args.model)
             
             # Run evaluation for each combination: profile -> question -> group
             total = len(profiles) * len(questions) * len(groups)
