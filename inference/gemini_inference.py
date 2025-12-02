@@ -13,7 +13,7 @@ except ImportError:
 
 class GeminiInference(BaseInference):
     SUPPORTED_MODELS = [
-        "gemini-2.5-pro",
+        "gemini-2.5-flash",
     ]
     
     def __init__(self, model_name: str, api_key: Optional[str] = None):
@@ -77,9 +77,11 @@ class GeminiInference(BaseInference):
                 pil_image = self._load_image_for_gemini(img)
                 content_parts.append(pil_image)
         
-        # Configure generation
+        # Configure generation - increase max_output_tokens to allow longer responses
+        # Gemini 2.5 Pro supports up to 8192 output tokens
+        max_tokens = max(max_new_tokens, 4096)
         generation_config = genai.types.GenerationConfig(
-            max_output_tokens=max(max_new_tokens, 2048),
+            max_output_tokens=max_tokens,
             temperature=temperature,
         )
         
@@ -95,21 +97,35 @@ class GeminiInference(BaseInference):
         )
         
         # Debug logging to inspect raw response structure when Gemini returns no text
-        print("\n[GEMINI DEBUG] Raw response:", response)
-        candidates = getattr(response, "candidates", None) or []
-        for idx, cand in enumerate(candidates):
-            finish_reason = getattr(cand, "finish_reason", None)
-            safety = getattr(cand, "safety_ratings", None)
-            print(f"[GEMINI DEBUG] Candidate {idx} finish_reason: {finish_reason}")
-            print(f"[GEMINI DEBUG] Candidate {idx} safety_ratings: {safety}")
+        # print("\n[GEMINI DEBUG] Raw response:", response)
+        # candidates = getattr(response, "candidates", None) or []
+        # for idx, cand in enumerate(candidates):
+        #     finish_reason = getattr(cand, "finish_reason", None)
+        #     safety = getattr(cand, "safety_ratings", None)
+        #     print(f"[GEMINI DEBUG] Candidate {idx} finish_reason: {finish_reason}")
+        #     print(f"[GEMINI DEBUG] Candidate {idx} safety_ratings: {safety}")
         
         # Extract response text safely (Gemini may return no Parts when finish_reason != OK)
         response_text = ""
         try:
+            # Try the standard text accessor first
             if hasattr(response, "text") and response.text:
                 response_text = response.text
-        except Exception:
+            else:
+                # Fallback: try to extract from candidates directly
+                if candidates:
+                    candidate = candidates[0]
+                    if hasattr(candidate, "content") and candidate.content:
+                        parts = getattr(candidate.content, "parts", [])
+                        text_parts = []
+                        for part in parts:
+                            if hasattr(part, "text"):
+                                text_parts.append(part.text)
+                        if text_parts:
+                            response_text = "".join(text_parts)
+        except Exception as e:
             # Fall back to empty string if quick accessor fails
+            print(f"[ERROR] Failed to extract response text: {e}")
             response_text = ""
         
         # Get token counts if available

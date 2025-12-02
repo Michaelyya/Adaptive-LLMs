@@ -242,7 +242,7 @@ def main():
         {"name": "gpt-4o", "type": "openai"},
         {"name": "gpt-5", "type": "openai"},
         {"name": "o1", "type": "openai"},
-        {"name": "gemini-2.5-pro", "type": "gemini"},
+        {"name": "gemini-2.5-flash", "type": "gemini"},
     ]
     
     benchmark = AdaptiveLearningBenchmark(output_dir=args.output)
